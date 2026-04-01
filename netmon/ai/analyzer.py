@@ -8,6 +8,12 @@ import anthropic
 
 from netmon import config
 
+# mock connections for testing purposes
+_MOCK_CONNECTIONS = [
+    {"pid": 1234, "process": "firefox", "proto": "TCP", "local": "192.168.1.5:54321", "remote": "93.184.216.34:443", "status": "ESTABLISHED"},
+    {"pid": 5678, "process": "sshd", "proto": "TCP", "local": "0.0.0.0:22", "remote": "", "status": "LISTEN"},
+]
+
 _SYSTEM_PROMPT = """\
 Ты — эксперт по сетевой безопасности Linux. Твоя задача — проанализировать \
 список активных сетевых соединений и выявить потенциальные угрозы или \
