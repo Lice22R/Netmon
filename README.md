@@ -5,7 +5,7 @@ A terminal-based network monitor for Linux. Displays all active TCP/UDP connecti
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
-<img width="1842" height="784" alt="изображение" src="https://github.com/user-attachments/assets/c5b6482e-9e22-49a8-b605-251e42cbfde6" />
+<img width="1841" height="791" alt="изображение" src="https://github.com/user-attachments/assets/368d00ab-728a-452d-8cdc-36991f53c3cb" />
 
 ---
 
