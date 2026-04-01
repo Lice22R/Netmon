@@ -1,0 +1,56 @@
+Screen {
+    layout: vertical;
+}
+
+#main-container {
+    layout: vertical;
+    height: 1fr;
+}
+
+#table-panel {
+    height: 2fr;
+    border: solid $primary;
+    padding: 0 1;
+}
+
+#ai-panel {
+    height: 1fr;
+    border: solid $accent;
+    padding: 0 1;
+    display: none;
+}
+
+#ai-panel.visible {
+    display: block;
+}
+
+#ai-label {
+    color: $accent;
+    text-style: bold;
+    padding: 0 0 1 0;
+}
+
+#controls {
+    height: 3;
+    layout: horizontal;
+    align: center middle;
+    padding: 0 1;
+}
+
+#btn-analyze {
+    margin: 0 1;
+}
+
+#btn-clear {
+    margin: 0 1;
+}
+
+#status-bar {
+    height: 1;
+    background: $surface;
+    color: $text-muted;
+}
+
+DataTable {
+    height: 1fr;
+}
