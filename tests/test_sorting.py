@@ -72,8 +72,8 @@ class TestSortStateApply:
         assert state.ascending is True
         assert state.column == 2
 
-    def test_apply_all_six_columns(self):
-        for col in range(1, 7):
+    def test_apply_all_seven_columns(self):
+        for col in range(1, 8):
             state = SortState()
             state.apply(col)
             assert state.column == col
@@ -139,8 +139,8 @@ class TestSortStateArrow:
 
 
 class TestSortColumns:
-    def test_has_six_entries(self):
-        assert len(SORT_COLUMNS) == 6
+    def test_has_seven_entries(self):
+        assert len(SORT_COLUMNS) == 7
 
     def test_each_entry_is_tuple_of_two_strings(self):
         for entry in SORT_COLUMNS:

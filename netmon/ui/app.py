@@ -40,10 +40,10 @@ class NetmonApp(App):
         Binding("1", "sort(1)", "Сорт: Процесс", show=False),
         Binding("2", "sort(2)", "Сорт: PID", show=False),
         Binding("3", "sort(3)", "Сорт: Протокол", show=False),
-        Binding("4", "sort(4)", "Сорт: Лок. адрес", show=False),
-        Binding("5", "sort(5)", "Сорт: Удал. адрес", show=False),
-        Binding("6", "sort(6)", "Сорт: Статус", show=False),
-        Binding("7", "sort(7)", "Сорт: Сервис", show=False),
+        Binding("4", "sort(4)", "Сорт: Сервис", show=False),
+        Binding("5", "sort(5)", "Сорт: Лок. адрес", show=False),
+        Binding("6", "sort(6)", "Сорт: Удал. адрес", show=False),
+        Binding("7", "sort(7)", "Сорт: Статус", show=False),
     ]
 
     TITLE = config.APP_TITLE
@@ -79,8 +79,8 @@ class NetmonApp(App):
     def on_mount(self) -> None:
         table = self.query_one("#conn-table", DataTable)
         self._col_keys = list(table.add_columns(
-            "Процесс [1]", "PID [2]", "Протокол [3]",
-            "Локальный адрес [4]", "Удалённый адрес [5]", "Статус [6]", "Сервис [7]",
+            "Процесс [1]", "PID [2]", "Протокол [3]", "Сервис [4]",
+            "Локальный адрес [5]", "Удалённый адрес [6]", "Статус [7]",
         ))
         self._start_auto_refresh()
 
@@ -130,10 +130,10 @@ class NetmonApp(App):
                 conn.process_name,
                 str(conn.pid) if conn.pid else "—",
                 conn.protocol,
+                conn.app_protocol or "—",
                 conn.local_addr,
                 conn.remote_addr,
                 conn.status,
-                conn.app_protocol or "—",
             )
         if self._connections:
             table.move_cursor(row=min(cursor_row, len(self._connections) - 1))

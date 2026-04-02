@@ -8,10 +8,10 @@ SORT_COLUMNS: list[tuple[str, str]] = [
     ("process_name", "Процесс"),
     ("pid",          "PID"),
     ("protocol",     "Протокол"),
+    ("app_protocol", "Сервис"),
     ("local_addr",   "Локальный адрес"),
     ("remote_addr",  "Удалённый адрес"),
     ("status",       "Статус"),
-    ("app_protocol", "Сервис"),
 ]
 
 

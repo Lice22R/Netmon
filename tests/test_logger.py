@@ -37,6 +37,7 @@ def _make_connection(pid: int, name: str, remote: str = "8.8.8.8:443") -> Connec
         remote_addr=remote,
         status="ESTABLISHED",
         protocol="TCP",
+        app_protocol="HTTPS",
         raw_laddr=MagicMock(),
         raw_raddr=MagicMock(),
     )
