@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from datetime import datetime
 from typing import ClassVar
+
+import psutil
 
 from textual import on, work
 from textual.app import App, ComposeResult
@@ -15,7 +18,7 @@ from netmon.ai.analyzer import AIAnalyzer
 from netmon.monitor.collector import Connection, collect
 from netmon.monitor.logger import ConnectionLogger
 from netmon.ui.sorting import SORT_COLUMNS, SortState
-from netmon.ui.widgets import StatusBar
+from netmon.ui.widgets import StatusBar, TrafficBar
 
 
 def _connection_sort_key(conn: Connection, attr: str) -> str:
@@ -40,6 +43,7 @@ class NetmonApp(App):
         Binding("4", "sort(4)", "Сорт: Лок. адрес", show=False),
         Binding("5", "sort(5)", "Сорт: Удал. адрес", show=False),
         Binding("6", "sort(6)", "Сорт: Статус", show=False),
+        Binding("7", "sort(7)", "Сорт: Сервис", show=False),
     ]
 
     TITLE = config.APP_TITLE
@@ -52,12 +56,15 @@ class NetmonApp(App):
         self._ai_analyzer: AIAnalyzer | None = None
         self._sort = SortState()
         self._col_keys: list = []
+        self._traffic_baseline = psutil.net_io_counters()
+        self._session_start = time.monotonic()
 
     # ------------------------------------------------------------------ compose
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical(id="main-container"):
+            yield TrafficBar(id="traffic-bar")
             with Vertical(id="table-panel"):
                 yield DataTable(id="conn-table", zebra_stripes=True, cursor_type="row")
             with Vertical(id="ai-panel"):
@@ -73,7 +80,7 @@ class NetmonApp(App):
         table = self.query_one("#conn-table", DataTable)
         self._col_keys = list(table.add_columns(
             "Процесс [1]", "PID [2]", "Протокол [3]",
-            "Локальный адрес [4]", "Удалённый адрес [5]", "Статус [6]",
+            "Локальный адрес [4]", "Удалённый адрес [5]", "Статус [6]", "Сервис [7]",
         ))
         self._start_auto_refresh()
 
@@ -92,6 +99,7 @@ class NetmonApp(App):
         self._conn_logger.log(self._connections)
         self._update_table()
         self._update_status_bar()
+        self._update_traffic_bar()
 
     # ------------------------------------------------------------------ table
 
@@ -104,6 +112,13 @@ class NetmonApp(App):
             key=lambda c: _connection_sort_key(c, attr),
             reverse=not self._sort.ascending,
         )
+
+    def _update_traffic_bar(self) -> None:
+        current = psutil.net_io_counters()
+        bar = self.query_one("#traffic-bar", TrafficBar)
+        bar.bytes_sent = current.bytes_sent - self._traffic_baseline.bytes_sent
+        bar.bytes_recv = current.bytes_recv - self._traffic_baseline.bytes_recv
+        bar.session_seconds = int(time.monotonic() - self._session_start)
 
     def _update_table(self) -> None:
         table = self.query_one("#conn-table", DataTable)
@@ -118,6 +133,7 @@ class NetmonApp(App):
                 conn.local_addr,
                 conn.remote_addr,
                 conn.status,
+                conn.app_protocol or "—",
             )
         if self._connections:
             table.move_cursor(row=min(cursor_row, len(self._connections) - 1))

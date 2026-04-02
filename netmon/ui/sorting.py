@@ -11,6 +11,7 @@ SORT_COLUMNS: list[tuple[str, str]] = [
     ("local_addr",   "Локальный адрес"),
     ("remote_addr",  "Удалённый адрес"),
     ("status",       "Статус"),
+    ("app_protocol", "Сервис"),
 ]
 
 

@@ -21,6 +21,7 @@ sys.path.insert(0, "/home/lice/hdd/Projects/netmon")
 
 from netmon.monitor.collector import (
     Connection,
+    _detect_app_protocol,
     _format_addr,
     _get_process_info,
     collect,
@@ -136,6 +137,48 @@ class TestGetProcessInfo:
         assert path == ""
 
 
+# ─────────────────────────────────────────────────────────────── _detect_app_protocol
+
+class TestDetectAppProtocol:
+    def test_https_by_remote_port(self):
+        assert _detect_app_protocol(50000, 443) == "HTTPS"
+
+    def test_http_by_remote_port(self):
+        assert _detect_app_protocol(50000, 80) == "HTTP"
+
+    def test_ssh_by_local_port(self):
+        # LISTEN на 22 — remote port 0, local port 22
+        assert _detect_app_protocol(22, 0) == "SSH"
+
+    def test_dns_udp(self):
+        assert _detect_app_protocol(12345, 53) == "DNS"
+
+    def test_unknown_port_returns_empty(self):
+        assert _detect_app_protocol(54321, 9999) == ""
+
+    def test_remote_takes_priority_over_local(self):
+        # remote=443 (HTTPS), local=80 (HTTP) → remote wins
+        assert _detect_app_protocol(80, 443) == "HTTPS"
+
+    def test_smtp_port_587(self):
+        assert _detect_app_protocol(50000, 587) == "SMTP"
+
+    def test_mysql_port(self):
+        assert _detect_app_protocol(50000, 3306) == "MySQL"
+
+    def test_postgres_port(self):
+        assert _detect_app_protocol(50000, 5432) == "PostgreSQL"
+
+    def test_redis_port(self):
+        assert _detect_app_protocol(50000, 6379) == "Redis"
+
+    def test_both_ports_unknown(self):
+        assert _detect_app_protocol(0, 0) == ""
+
+    def test_http_alt_8080(self):
+        assert _detect_app_protocol(50000, 8080) == "HTTP"
+
+
 # ─────────────────────────────────────────────────────────────── collect
 
 def _make_mock_conn(pid, laddr_ip, laddr_port, raddr_ip=None, raddr_port=None,
@@ -180,6 +223,7 @@ class TestCollect:
         assert result[0].process_name == "curl"
         assert result[0].protocol == "TCP"
         assert result[0].remote_addr == "8.8.8.8:443"
+        assert result[0].app_protocol == "HTTPS"
 
     def test_udp_connection(self):
         mock_conn = _make_mock_conn(5678, "0.0.0.0", 53, kind="SOCK_DGRAM")
@@ -305,11 +349,12 @@ class TestConnectionToDict:
             remote_addr="8.8.8.8:443",
             status="ESTABLISHED",
             protocol="TCP",
+            app_protocol="HTTPS",
             raw_laddr=MagicMock(),
             raw_raddr=MagicMock(),
         )
         d = conn.to_dict()
-        assert set(d.keys()) == {"pid", "process", "local", "remote", "status", "protocol"}
+        assert set(d.keys()) == {"pid", "process", "local", "remote", "status", "protocol", "app_protocol"}
 
     def test_to_dict_values(self):
         conn = Connection(
@@ -320,6 +365,7 @@ class TestConnectionToDict:
             remote_addr="-",
             status="LISTEN",
             protocol="TCP",
+            app_protocol="HTTP",
             raw_laddr=MagicMock(),
             raw_raddr=(),
         )
@@ -327,6 +373,7 @@ class TestConnectionToDict:
         assert d["pid"] == 42
         assert d["process"] == "myapp"
         assert d["status"] == "LISTEN"
+        assert d["app_protocol"] == "HTTP"
 
     def test_to_dict_none_pid(self):
         conn = Connection(
@@ -337,8 +384,10 @@ class TestConnectionToDict:
             remote_addr="-",
             status="LISTEN",
             protocol="TCP",
+            app_protocol="SSH",
             raw_laddr=MagicMock(),
             raw_raddr=(),
         )
         d = conn.to_dict()
         assert d["pid"] is None
+        assert d["app_protocol"] == "SSH"

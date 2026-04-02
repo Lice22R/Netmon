@@ -45,6 +45,12 @@ Screen {
     margin: 0 1;
 }
 
+#traffic-bar {
+    height: 1;
+    background: $surface;
+    color: $accent;
+}
+
 #status-bar {
     height: 1;
     background: $surface;
